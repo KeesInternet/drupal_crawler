@@ -1,0 +1,58 @@
+<?php
+use VDB\Spider\Discoverer\XPathExpressionDiscoverer;
+use VDB\Spider\StatsHandler;
+use VDB\Spider\Spider;
+use Drupal\Core\Link;
+
+function kees_crawler_rebuild()
+{
+    $config = \Drupal::config('kees_crawler.settings');
+    $siteUrl = \Drupal::request()->getSchemeAndHttpHost();
+    $crawler = crawler(
+        $siteUrl,
+        $config->get("kees_crawler.crawl_div_id"),
+        $config->get("kees_crawler.max_crawlable_pages"),
+        $config->get("kees_crawler.max_depth")
+    );
+    $crawlCount = count($crawler->getPersisted());
+
+    if (0 == $crawlCount) {
+        $link = Link::createFromRoute('Here', 'kees_crawler.settings')
+        ->toString()
+        ->getGeneratedLink();
+        drupal_set_message(t("No pages were crawled. Check your configuration $link"));
+    } else {
+        drupal_set_message("Succesfully crawled $crawlCount pages.");
+    }
+}
+
+/**
+ * Crawler
+ *
+ * This function will create the spider with the given options and crawl trough the site
+ *
+ * @param string $siteUrl
+ * @param string $pageClass
+ * @param integer $queSize
+ * @param integer $depth
+ * @return void
+ */
+function crawler(string $siteUrl, string $pageId = "page", int $queSize = 50, int $depth = 1)
+{
+    $spider = new Spider($siteUrl);
+    // Add a URI discoverer. Without it, the spider does nothing. In this case, we want <a> tags from a certain <div>
+    $spider->getDiscovererSet()->set(new XPathExpressionDiscoverer("//div[@id='$pageId']//a"));
+    // Set some sane options for this example. In this case, we only get the first 10 items from the start page.
+    $spider->getDiscovererSet()->maxDepth = $depth;
+    $spider->getQueueManager()->maxQueueSize = $queSize;
+    // Add a listener to collect stats to the Spider and the QueueMananger.
+    // There are more components that dispatch events you can use.
+    $statsHandler = new StatsHandler();
+    $spider->getQueueManager()->getDispatcher()->addSubscriber($statsHandler);
+    $spider->getDispatcher()->addSubscriber($statsHandler);
+
+    $spider->crawl();
+    
+    return $statsHandler;
+    
+}

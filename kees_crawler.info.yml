@@ -1,0 +1,6 @@
+name: Kees Crawler
+description: Will crawl website after cache clear is run to avoid slow pageloads
+package: Custom
+
+type: module
+core: 8.x
