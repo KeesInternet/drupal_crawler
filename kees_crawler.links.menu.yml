@@ -1,0 +1,5 @@
+kees_crawler.settings:
+  title: 'Crawler settings'
+  parent: system.admin_config_development
+  description: 'Crawler settings.'
+  route_name: kees_crawler.settings

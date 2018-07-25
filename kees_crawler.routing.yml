@@ -1,0 +1,7 @@
+kees_crawler.settings:
+  path: '/admin/config/development/performance/crawler'
+  defaults:
+    _form: 'Drupal\kees_crawler\Form\KeesCrawlerSettingsForm'
+    _title: 'CrawlerSettings'
+  requirements:
+    _permission: 'administer site configuration'

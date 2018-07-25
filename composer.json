@@ -1,0 +1,13 @@
+{
+    "name": "keestm/crawler",
+    "description": "A Drupal module that crawls the website after clearing cache",
+    "type": "drupal-module",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "KeesTM"
+        }
+    ],
+    "require": {}
+}
