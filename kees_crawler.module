@@ -17,10 +17,10 @@ function kees_crawler_rebuild()
     $crawlCount = count($crawler->getPersisted());
 
     if (0 == $crawlCount) {
-        $link = Link::createFromRoute('Here', 'kees_crawler.settings')
+        $link = Link::createFromRoute('Check your configuration here', 'kees_crawler.settings')
         ->toString()
         ->getGeneratedLink();
-        drupal_set_message(t("No pages were crawled. Check your configuration $link"));
+        drupal_set_message(t("No pages were crawled. $link"));
     } else {
         drupal_set_message("Succesfully crawled $crawlCount pages.");
     }
@@ -37,7 +37,7 @@ function kees_crawler_rebuild()
  * @param integer $depth
  * @return void
  */
-function crawler(string $siteUrl, string $pageId = "page", int $queSize = 50, int $depth = 1)
+function crawler(string $siteUrl, string $pageId, int $queSize, int $depth)
 {
     $spider = new Spider($siteUrl);
     // Add a URI discoverer. Without it, the spider does nothing. In this case, we want <a> tags from a certain <div>
@@ -52,7 +52,13 @@ function crawler(string $siteUrl, string $pageId = "page", int $queSize = 50, in
     $spider->getDispatcher()->addSubscriber($statsHandler);
 
     $spider->crawl();
-    
+
+    $log = "Crawled pages: <br>";
+    foreach ($spider->getDownloader()->getPersistenceHandler() as $resource) {
+        $log .= "<br> ". $resource->getCrawler()->filterXpath('//title')->text();
+    }
+    \Drupal::logger('kees_crawler')->notice($log);
+
     return $statsHandler;
-    
+
 }
